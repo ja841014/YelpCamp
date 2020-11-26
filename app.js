@@ -3,6 +3,9 @@ const path = require('path');
 const mongoose = require('mongoose');
 // kind of template
 const ejsMate = require('ejs-mate');
+// our own error function
+const catchAsync = require('./utils/catchAsync')
+const ExpressError = require('./utils/ExpressError');
 // the over-ride method can fake a put method as patch
 const methodOverride = require('method-override');
 
@@ -38,49 +41,67 @@ app.get('/', (req, res) => {
     res.render('home');
 });
 
-app.get('/campgrounds', async(req, res) => {
+app.get('/campgrounds', catchAsync(async(req, res) => {
     const campgrounds = await Campground.find({});
     res.render('campgrounds/index', {campgrounds});
-});
+}));
 
 // create new Post
 app.get('/campgrounds/new', (req, res) => {
     res.render('campgrounds/new');
 });
-app.post('/campgrounds/', async(req, res) => {
+app.post('/campgrounds/',  catchAsync(async(req, res) => {
+    if(!req.body.campground) {
+        throw new ExpressError('Invalid campground Data', 400);
+    }
     const campground = new Campground(req.body.campground);
     await campground.save();
     //redirect to /campgrounds/:id this route
     res.redirect(`/campgrounds/${campground._id}`)
-})
+}))
 // create new Post
 
-// shoe specific post
-app.get('/campgrounds/:id', async(req, res) => {
+// show specific post
+app.get('/campgrounds/:id', catchAsync(async(req, res) => {
     const campground  = await Campground.findById(req.params.id);
     res.render('campgrounds/show', {campground});
-});
+}));
 // update post
-app.get('/campgrounds/:id/edit', async(req, res) => {
+app.get('/campgrounds/:id/edit', catchAsync(async(req, res) => {
     const campground  = await Campground.findById(req.params.id);
     res.render('campgrounds/edit', {campground});
-});
+}));
 
-app.put('/campgrounds/:id', async(req, res) => {
+app.put('/campgrounds/:id', catchAsync(async(req, res) => {
     const{ id } = req.params;
     const campground =  await Campground.findByIdAndUpdate(id, {...req.body.campground});
     res.redirect(`/campgrounds/${campground._id}`);
-});
+}));
 // update post
 
 // delete
-app.delete('/campgrounds/:id', async(req, res) => {
+app.delete('/campgrounds/:id', catchAsync(async(req, res) => {
     const { id } = req.params;
     // delete in databsse
     await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds');
-})
+}));
 // delete
+// nothing is match in the above route will go in this route
+app.all('*', (req, res, next) => {
+    // this next will hit the generic error handler below
+    next(new ExpressError('404 Page Not Found', 404));
+})
+
+// generic error handler
+app.use((err, req, res, next) => {
+    // default statusCode is 500 and default message = "sth wrong"
+    const {statusCode = 500} = err;
+    if(!err.message) {
+        err.message = 'Something went wrong'
+    }
+    res.status(statusCode).render('error', {err});
+})
 
 app.listen(3000, () => {
     console.log("CONNECTED!");

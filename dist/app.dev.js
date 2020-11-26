@@ -13,7 +13,12 @@ var path = require('path');
 var mongoose = require('mongoose'); // kind of template
 
 
-var ejsMate = require('ejs-mate'); // the over-ride method can fake a put method as patch
+var ejsMate = require('ejs-mate'); // our own error function
+
+
+var catchAsync = require('./utils/catchAsync');
+
+var ExpressError = require('./utils/ExpressError'); // the over-ride method can fake a put method as patch
 
 
 var methodOverride = require('method-override');
@@ -46,7 +51,7 @@ app.use(methodOverride('_method'));
 app.get('/', function (req, res) {
   res.render('home');
 });
-app.get('/campgrounds', function _callee(req, res) {
+app.get('/campgrounds', catchAsync(function _callee(req, res) {
   var campgrounds;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
@@ -67,35 +72,43 @@ app.get('/campgrounds', function _callee(req, res) {
       }
     }
   });
-}); // create new Post
+})); // create new Post
 
 app.get('/campgrounds/new', function (req, res) {
   res.render('campgrounds/new');
 });
-app.post('/campgrounds/', function _callee2(req, res) {
+app.post('/campgrounds/', catchAsync(function _callee2(req, res) {
   var campground;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
+          if (req.body.campground) {
+            _context2.next = 2;
+            break;
+          }
+
+          throw new ExpressError('Invalid campground Data', 400);
+
+        case 2:
           campground = new Campground(req.body.campground);
-          _context2.next = 3;
+          _context2.next = 5;
           return regeneratorRuntime.awrap(campground.save());
 
-        case 3:
+        case 5:
           //redirect to /campgrounds/:id this route
           res.redirect("/campgrounds/".concat(campground._id));
 
-        case 4:
+        case 6:
         case "end":
           return _context2.stop();
       }
     }
   });
-}); // create new Post
-// shoe specific post
+})); // create new Post
+// show specific post
 
-app.get('/campgrounds/:id', function _callee3(req, res) {
+app.get('/campgrounds/:id', catchAsync(function _callee3(req, res) {
   var campground;
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
@@ -116,9 +129,9 @@ app.get('/campgrounds/:id', function _callee3(req, res) {
       }
     }
   });
-}); // update post
+})); // update post
 
-app.get('/campgrounds/:id/edit', function _callee4(req, res) {
+app.get('/campgrounds/:id/edit', catchAsync(function _callee4(req, res) {
   var campground;
   return regeneratorRuntime.async(function _callee4$(_context4) {
     while (1) {
@@ -139,8 +152,8 @@ app.get('/campgrounds/:id/edit', function _callee4(req, res) {
       }
     }
   });
-});
-app.put('/campgrounds/:id', function _callee5(req, res) {
+}));
+app.put('/campgrounds/:id', catchAsync(function _callee5(req, res) {
   var id, campground;
   return regeneratorRuntime.async(function _callee5$(_context5) {
     while (1) {
@@ -160,10 +173,10 @@ app.put('/campgrounds/:id', function _callee5(req, res) {
       }
     }
   });
-}); // update post
+})); // update post
 // delete
 
-app["delete"]('/campgrounds/:id', function _callee6(req, res) {
+app["delete"]('/campgrounds/:id', catchAsync(function _callee6(req, res) {
   var id;
   return regeneratorRuntime.async(function _callee6$(_context6) {
     while (1) {
@@ -183,8 +196,27 @@ app["delete"]('/campgrounds/:id', function _callee6(req, res) {
       }
     }
   });
-}); // delete
+})); // delete
+// nothing is match in the above route will go in this route
 
+app.all('*', function (req, res, next) {
+  // this next will hit the generic error handler below
+  next(new ExpressError('404 Page Not Found', 404));
+}); // generic error handler
+
+app.use(function (err, req, res, next) {
+  // default statusCode is 500 and default message = "sth wrong"
+  var _err$statusCode = err.statusCode,
+      statusCode = _err$statusCode === void 0 ? 500 : _err$statusCode;
+
+  if (!err.message) {
+    err.message = 'Something went wrong';
+  }
+
+  res.status(statusCode).render('error', {
+    err: err
+  });
+});
 app.listen(3000, function () {
   console.log("CONNECTED!");
 });
