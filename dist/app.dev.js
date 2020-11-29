@@ -10,7 +10,10 @@ var express = require('express');
 
 var path = require('path');
 
-var mongoose = require('mongoose'); // kind of template
+var mongoose = require('mongoose'); // joi schema validation, its a validator tool
+
+
+var Joi = require('joi'); // kind of template
 
 
 var ejsMate = require('ejs-mate'); // our own error function
@@ -42,12 +45,40 @@ var app = express();
 app.engine('ejs', ejsMate);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views')); // app.use will run on every single request
-// encoded url ,s o we can parse in into req.body
+// encoded url ,so we can parse in into req.body
 
 app.use(express.urlencoded({
   extended: true
 }));
-app.use(methodOverride('_method'));
+app.use(methodOverride('_method')); // make validateCampground as a middleware
+
+var validateCampground = function validateCampground(req, res, next) {
+  // this is not mongoose schema
+  var campgroundSchema = Joi.object({
+    // object is a type
+    campground: Joi.object({
+      title: Joi.string().required(),
+      price: Joi.number().required().min(0),
+      image: Joi.string().required(),
+      location: Joi.string().required(),
+      description: Joi.string().required()
+    }).required()
+  });
+
+  var _campgroundSchema$val = campgroundSchema.validate(req.body),
+      error = _campgroundSchema$val.error;
+
+  if (error) {
+    // if there are morn tham one el.message then join with a ','
+    var msg = error.details.map(function (el) {
+      return el.message;
+    }).join(',');
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
+};
+
 app.get('/', function (req, res) {
   res.render('home');
 });
@@ -77,29 +108,24 @@ app.get('/campgrounds', catchAsync(function _callee(req, res) {
 app.get('/campgrounds/new', function (req, res) {
   res.render('campgrounds/new');
 });
-app.post('/campgrounds/', catchAsync(function _callee2(req, res) {
+app.post('/campgrounds/', validateCampground, catchAsync(function _callee2(req, res) {
   var campground;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          if (req.body.campground) {
-            _context2.next = 2;
-            break;
-          }
-
-          throw new ExpressError('Invalid campground Data', 400);
-
-        case 2:
+          // if(!req.body.campground) {
+          //     throw new ExpressError('Invalid campground Data', 400);
+          // }
           campground = new Campground(req.body.campground);
-          _context2.next = 5;
+          _context2.next = 3;
           return regeneratorRuntime.awrap(campground.save());
 
-        case 5:
+        case 3:
           //redirect to /campgrounds/:id this route
           res.redirect("/campgrounds/".concat(campground._id));
 
-        case 6:
+        case 4:
         case "end":
           return _context2.stop();
       }

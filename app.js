@@ -1,6 +1,9 @@
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
+
+// joi schema validation, its a validator tool
+const Joi = require('joi');
 // kind of template
 const ejsMate = require('ejs-mate');
 // our own error function
@@ -32,9 +35,33 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // app.use will run on every single request
-// encoded url ,s o we can parse in into req.body
+// encoded url ,so we can parse in into req.body
 app.use(express.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
+
+// make validateCampground as a middleware
+const validateCampground = (req,res, next) => {
+    // this is not mongoose schema
+    const campgroundSchema = Joi.object({
+            // object is a type
+        campground: Joi.object({
+            title: Joi.string().required(),
+            price: Joi.number().required().min(0),
+            image: Joi.string().required(),
+            location: Joi.string().required(),
+            description: Joi.string().required(),
+            }).required()
+    })
+    const {error} = campgroundSchema.validate(req.body);
+    if(error) {
+        // if there are morn tham one el.message then join with a ','
+        const msg = error.details.map(el => el.message).join(',');
+        throw new ExpressError(msg, 400);
+    }
+    else {
+        next();
+    }
+}
 
 
 app.get('/', (req, res) => {
@@ -50,10 +77,10 @@ app.get('/campgrounds', catchAsync(async(req, res) => {
 app.get('/campgrounds/new', (req, res) => {
     res.render('campgrounds/new');
 });
-app.post('/campgrounds/',  catchAsync(async(req, res) => {
-    if(!req.body.campground) {
-        throw new ExpressError('Invalid campground Data', 400);
-    }
+app.post('/campgrounds/',  validateCampground, catchAsync(async(req, res) => {
+    // if(!req.body.campground) {
+    //     throw new ExpressError('Invalid campground Data', 400);
+    // }
     const campground = new Campground(req.body.campground);
     await campground.save();
     //redirect to /campgrounds/:id this route
