@@ -2,23 +2,32 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 
-// joi schema validation, its a validator tool
-const Joi = require('joi');
 // kind of template
 const ejsMate = require('ejs-mate');
+
+const session = require('express-session')
+const flash = require('connect-flash')
 // our own error function
-const catchAsync = require('./utils/catchAsync')
 const ExpressError = require('./utils/ExpressError');
 // the over-ride method can fake a put method as patch
 const methodOverride = require('method-override');
+const User =require('./models/user')
 
-const Campground = require('./models/campground')
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+// const Campground = require('./models/campground');
+// const Review = require('./models/review');
+// reconstruct the route
+const campgroundRoutes = require('./routes/campgrounds')
+const reviewRoutes = require('./routes/reviews')
+const userRoutes = require('./routes/users')
 
 // yelp-camp db name
 mongoose.connect('mongodb://localhost:27017/yelp-camp', { 
     useNewUrlParser: true, 
     useCreateIndex: true, 
-    useUnifiedTopology: true 
+    useUnifiedTopology: true,
+    useFindAndModify: false 
 });
 
 const db = mongoose.connection;
@@ -38,82 +47,51 @@ app.set('views', path.join(__dirname, 'views'));
 // encoded url ,so we can parse in into req.body
 app.use(express.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
-
-// make validateCampground as a middleware
-const validateCampground = (req,res, next) => {
-    // this is not mongoose schema
-    const campgroundSchema = Joi.object({
-            // object is a type
-        campground: Joi.object({
-            title: Joi.string().required(),
-            price: Joi.number().required().min(0),
-            image: Joi.string().required(),
-            location: Joi.string().required(),
-            description: Joi.string().required(),
-            }).required()
-    })
-    const {error} = campgroundSchema.validate(req.body);
-    if(error) {
-        // if there are morn tham one el.message then join with a ','
-        const msg = error.details.map(el => el.message).join(',');
-        throw new ExpressError(msg, 400);
-    }
-    else {
-        next();
+app.use(express.static(path.join(__dirname, 'public')));
+const sessionConfig = {
+    secret: 'sould be a good secret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7
     }
 }
+app.use(session(sessionConfig));
+app.use(flash());
 
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// it is apply in every route
+app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
+
+
+   
+
+app.use('/campgrounds', campgroundRoutes);
+app.use('/campgrounds/:id/reviews', reviewRoutes)
+app.use('/', userRoutes);
 
 app.get('/', (req, res) => {
     res.render('home');
 });
 
-app.get('/campgrounds', catchAsync(async(req, res) => {
-    const campgrounds = await Campground.find({});
-    res.render('campgrounds/index', {campgrounds});
-}));
-
-// create new Post
-app.get('/campgrounds/new', (req, res) => {
-    res.render('campgrounds/new');
-});
-app.post('/campgrounds/',  validateCampground, catchAsync(async(req, res) => {
-    // if(!req.body.campground) {
-    //     throw new ExpressError('Invalid campground Data', 400);
-    // }
-    const campground = new Campground(req.body.campground);
-    await campground.save();
-    //redirect to /campgrounds/:id this route
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
-// create new Post
-
-// show specific post
-app.get('/campgrounds/:id', catchAsync(async(req, res) => {
-    const campground  = await Campground.findById(req.params.id);
-    res.render('campgrounds/show', {campground});
-}));
-// update post
-app.get('/campgrounds/:id/edit', catchAsync(async(req, res) => {
-    const campground  = await Campground.findById(req.params.id);
-    res.render('campgrounds/edit', {campground});
-}));
-
-app.put('/campgrounds/:id', catchAsync(async(req, res) => {
-    const{ id } = req.params;
-    const campground =  await Campground.findByIdAndUpdate(id, {...req.body.campground});
-    res.redirect(`/campgrounds/${campground._id}`);
-}));
-// update post
-
 // delete
-app.delete('/campgrounds/:id', catchAsync(async(req, res) => {
-    const { id } = req.params;
-    // delete in databsse
-    await Campground.findByIdAndDelete(id);
-    res.redirect('/campgrounds');
-}));
-// delete
+
+
+
+
 // nothing is match in the above route will go in this route
 app.all('*', (req, res, next) => {
     // this next will hit the generic error handler below

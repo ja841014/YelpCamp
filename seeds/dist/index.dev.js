@@ -48,7 +48,7 @@ var seedDB = function seedDB() {
           price = Math.floor(Math.random() * 20) + 10;
           camp = new Campground({
             //YOUR USER ID
-            // author: '5f5c330c2cd79d538f2c66d9',
+            author: '5fc5bc04da41405087f54228',
             location: "".concat(cities[random1000].city, ", ").concat(cities[random1000].state),
             title: "".concat(sample(descriptors), " ").concat(sample(places)),
             description: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam dolores vero perferendis laudantium, consequuntur voluptatibus nulla architecto, sit soluta esse iure sed labore ipsam a cum nihil atque molestiae deserunt!',
