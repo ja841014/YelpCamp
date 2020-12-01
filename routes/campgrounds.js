@@ -38,8 +38,15 @@ router.post('/',  isLoggedIn, validateCampground, catchAsync(async(req, res) => 
 
 // show specific post and its reviews and rating
 router.get('/:id', catchAsync(async(req, res) => {
-    // so right now we cam get reviews and author from this "campground"
-    const campground  = await Campground.findById(req.params.id).populate('reviews').populate('author');
+    // so right now we can get reviews and author from this "campground"
+    // populate all the review then populate every review's author
+    const campground  = await Campground.findById(req.params.id).populate({
+        path: 'reviews',
+        populate: {
+            path: 'author'
+        }
+    }).populate('author');
+    console.log(campground);
     // if did not find the campground
     if(!campground) {
         req.flash('error', 'Cannot find the campground');

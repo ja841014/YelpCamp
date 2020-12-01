@@ -7,7 +7,9 @@ var router = express.Router({
 });
 
 var _require = require('../middleware'),
-    validateReview = _require.validateReview;
+    validateReview = _require.validateReview,
+    isLoggedIn = _require.isLoggedIn,
+    isReviewAuthor = _require.isReviewAuthor;
 
 var Campground = require('../models/campground');
 
@@ -21,7 +23,7 @@ var ExpressError = require('../utils/ExpressError');
 var catchAsync = require('../utils/catchAsync'); // post a new review
 
 
-router.post('/', validateReview, catchAsync(function _callee(req, res) {
+router.post('/', isLoggedIn, validateReview, catchAsync(function _callee(req, res) {
   var campground, review;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
@@ -33,21 +35,22 @@ router.post('/', validateReview, catchAsync(function _callee(req, res) {
         case 2:
           campground = _context.sent;
           // this req.body.review has all the information at specific campground's review which name is in the format review[...]
-          review = new Review(req.body.review); // put the new review to the campground model's review field
+          review = new Review(req.body.review);
+          review.author = req.user._id; // put the new review to the campground model's review field
 
           campground.reviews.push(review);
-          _context.next = 7;
+          _context.next = 8;
           return regeneratorRuntime.awrap(review.save());
 
-        case 7:
-          _context.next = 9;
+        case 8:
+          _context.next = 10;
           return regeneratorRuntime.awrap(campground.save());
 
-        case 9:
+        case 10:
           req.flash('success', 'Successfully create a new review');
           res.redirect("/campgrounds/".concat(campground._id));
 
-        case 11:
+        case 12:
         case "end":
           return _context.stop();
       }
@@ -55,7 +58,7 @@ router.post('/', validateReview, catchAsync(function _callee(req, res) {
   });
 })); // delete a review
 
-router["delete"]('/:reviewID', catchAsync(function _callee2(req, res) {
+router["delete"]('/:reviewID', isLoggedIn, isReviewAuthor, catchAsync(function _callee2(req, res) {
   var _req$params, id, reviewID;
 
   return regeneratorRuntime.async(function _callee2$(_context2) {

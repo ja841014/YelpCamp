@@ -8,6 +8,8 @@ var ExpressError = require('./utils/ExpressError');
 
 var Campground = require('./models/campground');
 
+var Review = require('./models/review');
+
 module.exports.isLoggedIn = function (req, res, next) {
   //it is automatically added user field by passport
   console.log("REQ,USER:", req.user); // isAuthenticated is come from passport.js
@@ -67,6 +69,39 @@ module.exports.isAuthor = function _callee(req, res, next) {
         case 8:
         case "end":
           return _context.stop();
+      }
+    }
+  });
+};
+
+module.exports.isReviewAuthor = function _callee2(req, res, next) {
+  var _req$params, id, reviewId, review;
+
+  return regeneratorRuntime.async(function _callee2$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          _req$params = req.params, id = _req$params.id, reviewId = _req$params.reviewId;
+          _context2.next = 3;
+          return regeneratorRuntime.awrap(Review.findById(reviewId));
+
+        case 3:
+          review = _context2.sent;
+
+          if (review.author.equals(req.user._id)) {
+            _context2.next = 7;
+            break;
+          }
+
+          req.flash('error', 'You do not have permission');
+          return _context2.abrupt("return", res.redirect("/campgrounds/".concat(id)));
+
+        case 7:
+          next();
+
+        case 8:
+        case "end":
+          return _context2.stop();
       }
     }
   });

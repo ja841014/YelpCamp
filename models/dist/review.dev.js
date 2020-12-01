@@ -2,10 +2,14 @@
 
 var mongoose = require('mongoose');
 
-var Scheme = mongoose.Schema;
-var reviewdSchema = new Scheme({
+var Schema = mongoose.Schema;
+var reviewdSchema = new Schema({
   body: String,
-  rating: Number
+  rating: Number,
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }
 }); // built up model
 // collections is Review and db is yelp-camp
 

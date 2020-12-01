@@ -84,25 +84,31 @@ router.get('/:id', catchAsync(function _callee3(req, res) {
       switch (_context3.prev = _context3.next) {
         case 0:
           _context3.next = 2;
-          return regeneratorRuntime.awrap(Campground.findById(req.params.id).populate('reviews').populate('author'));
+          return regeneratorRuntime.awrap(Campground.findById(req.params.id).populate({
+            path: 'reviews',
+            populate: {
+              path: 'author'
+            }
+          }).populate('author'));
 
         case 2:
           campground = _context3.sent;
+          console.log(campground); // if did not find the campground
 
           if (campground) {
-            _context3.next = 6;
+            _context3.next = 7;
             break;
           }
 
           req.flash('error', 'Cannot find the campground');
           return _context3.abrupt("return", res.redirect('/campgrounds'));
 
-        case 6:
+        case 7:
           res.render('campgrounds/show', {
             campground: campground
           });
 
-        case 7:
+        case 8:
         case "end":
           return _context3.stop();
       }

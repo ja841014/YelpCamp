@@ -1,9 +1,13 @@
 const mongoose = require('mongoose');
 
-const Scheme = mongoose.Schema;
-const reviewdSchema = new Scheme({
+const Schema = mongoose.Schema;
+const reviewdSchema = new Schema({
     body: String,
-    rating: Number
+    rating: Number,
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }
 });
 // built up model
 // collections is Review and db is yelp-camp

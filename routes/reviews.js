@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router({mergeParams: true});
-const {validateReview} = require('../middleware')
+const {validateReview, isLoggedIn, isReviewAuthor} = require('../middleware')
 const Campground = require('../models/campground');
 const Review = require('../models/review');
 
@@ -15,11 +15,12 @@ const catchAsync = require('../utils/catchAsync')
 
 
 // post a new review
-router.post('/', validateReview, catchAsync(async(req, res) => {
+router.post('/', isLoggedIn, validateReview, catchAsync(async(req, res) => {
     // console.log(req.params);
     const campground = await Campground.findById(req.params.id);
                                     // this req.body.review has all the information at specific campground's review which name is in the format review[...]
     const review = new Review(req.body.review);
+    review.author = req.user._id;
     // put the new review to the campground model's review field
     campground.reviews.push(review);
     await review.save();
@@ -29,7 +30,7 @@ router.post('/', validateReview, catchAsync(async(req, res) => {
 }));
 
  // delete a review
- router.delete('/:reviewID', catchAsync(async(req, res) => {
+ router.delete('/:reviewID', isLoggedIn, isReviewAuthor, catchAsync(async(req, res) => {
     // this id and reviewID are come from URL
     const { id, reviewID } = req.params;
     // remove array from the mongoose => take this reviewID and pull any thing put of the reviews array
