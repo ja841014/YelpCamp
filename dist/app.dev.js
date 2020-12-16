@@ -1,5 +1,10 @@
 "use strict";
 
+// if we are not in the 'production' node enviornment we have to require 
+if (process.env.NODE_ENV !== "production") {
+  require('dotenv').config();
+}
+
 var express = require('express');
 
 var path = require('path');

@@ -7,7 +7,10 @@ var Review = require('./review');
 var Scheme = mongoose.Schema;
 var CampgroundSchema = new Scheme({
   title: String,
-  image: String,
+  images: [{
+    url: String,
+    filename: String
+  }],
   price: Number,
   description: String,
   location: String,

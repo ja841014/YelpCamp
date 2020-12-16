@@ -6,85 +6,44 @@ const catchAsync = require('../utils/catchAsync')
 // include campground model
 const Campground = require('../models/campground');
 
+const campgrounds = require('../controllers/campgrounds')
 const { isLoggedIn, validateCampground, isAuthor } = require('../middleware')
+// Multer is a node.js middleware for handling multipart/form-data, which is primarily used for uploading files. 
+// Multer adds a body object and a file or files object to the request object. The body object contains the values of the text fields of the form, the file or files object contains the files uploaded via the form.
+const multer  = require('multer')
+const {storage} = require('../cloudinary')
+const upload = multer({ storage })
 
-
-
-
-
-router.get('/', catchAsync(async(req, res) => {
-    const campgrounds = await Campground.find({});
-    res.render('campgrounds/index', {campgrounds});
-}));
-
-// create new Pos
-router.get('/new', isLoggedIn, (req, res) => {
+// we can use router.route to chaining all path together
+router.route('/')
+    .get(catchAsync(campgrounds.index))
+    .post(isLoggedIn, upload.array('image'), validateCampground, catchAsync(campgrounds.createCampground));
     
-    res.render('campgrounds/new');
-})
-router.post('/',  isLoggedIn, validateCampground, catchAsync(async(req, res) => {
-    
-    // if(!req.body.campground) {
-    //     throw new ExpressError('Invalid campground Data', 400);
-    // }
-    const campground = new Campground(req.body.campground);
-    campground.author = req.user._id;
-    await campground.save();
-    req.flash('success', 'Succeessfully made a new campground');
-    //redirect to /campgrounds/:id this route
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
-// create new Post
+
+
+// create new campground
+router.get('/new', isLoggedIn, campgrounds.renderNewForm)
+
+router.route('/:id')
+    .get(catchAsync(campgrounds.showCampground))
+    .put(isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.updateCampground))
+    .delete(isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground));
+
+// router.get('/', catchAsync(campgrounds.index));
+
+
+// router.post('/',  isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground));
+// create new campground
 
 // show specific post and its reviews and rating
-router.get('/:id', catchAsync(async(req, res) => {
-    // so right now we can get reviews and author from this "campground"
-    // populate all the review then populate every review's author
-    const campground  = await Campground.findById(req.params.id).populate({
-        path: 'reviews',
-        populate: {
-            path: 'author'
-        }
-    }).populate('author');
-    console.log(campground);
-    // if did not find the campground
-    if(!campground) {
-        req.flash('error', 'Cannot find the campground');
-        return res.redirect('/campgrounds')
-    }
-    res.render('campgrounds/show', { campground });
-}));
+// router.get('/:id', catchAsync(campgrounds.showCampground));
 
-// this is edit page  update pos !!! I cannot UPDATE!!
-router.get('/:id/edit', isLoggedIn, isAuthor, catchAsync(async(req, res) => {
-    const { id } = req.params;
-    const campground  = await Campground.findById(id);
-    // if did not find the campground
-    if(!campground) {
-        req.flash('error', 'Cannot find the campground');
-        return res.redirect('/campgrounds')
-    }
-    res.render('campgrounds/edit', {campground});
-}));
+// this is show edit page  
+router.get('/:id/edit', isLoggedIn, isAuthor, catchAsync(campgrounds.renderEditForm));
+// update post !!! 
+// router.put('/:id', isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.updateCampground));
 
-router.put('/:id', isLoggedIn, isAuthor, validateCampground, catchAsync(async(req, res) => {
-    const{ id } = req.params;
-    
-    const campground =  await Campground.findByIdAndUpdate(id, {...req.body.campground});
-    req.flash('success', 'Successfully update a campground');
-    // console.log(campground);
-    res.redirect(`/campgrounds/${campground._id}`);
-}));
-// update post
-
-// delet
-router.delete('/:id', isLoggedIn, isAuthor, catchAsync(async(req, res) => {
-    const { id } = req.params;
-    
-    // delete in databsse
-    await Campground.findByIdAndDelete(id);
-    req.flash('success', 'Successfully delete a campground');
-    res.redirect('/campgrounds');
-}));
+// delete
+// router.delete('/:id', isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground));
 
 module.exports = router;
