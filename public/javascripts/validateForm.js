@@ -2,6 +2,8 @@
 (function () {
     'use strict'
 
+    bsCustomFileInput.init()
+    
     // Fetch all the forms we want to apply custom Bootstrap validation styles to 
     // validated-form is the class name we define above
     const forms = document.querySelectorAll('.validated-form')

@@ -33,7 +33,7 @@ var upload = multer({
 router.route('/').get(catchAsync(campgrounds.index)).post(isLoggedIn, upload.array('image'), validateCampground, catchAsync(campgrounds.createCampground)); // create new campground
 
 router.get('/new', isLoggedIn, campgrounds.renderNewForm);
-router.route('/:id').get(catchAsync(campgrounds.showCampground)).put(isLoggedIn, isAuthor, validateCampground, catchAsync(campgrounds.updateCampground))["delete"](isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground)); // router.get('/', catchAsync(campgrounds.index));
+router.route('/:id').get(catchAsync(campgrounds.showCampground)).put(isLoggedIn, isAuthor, upload.array('image'), validateCampground, catchAsync(campgrounds.updateCampground))["delete"](isLoggedIn, isAuthor, catchAsync(campgrounds.deleteCampground)); // router.get('/', catchAsync(campgrounds.index));
 // router.post('/',  isLoggedIn, validateCampground, catchAsync(campgrounds.createCampground));
 // create new campground
 // show specific post and its reviews and rating
