@@ -4,13 +4,32 @@ var mongoose = require('mongoose');
 
 var Review = require('./review');
 
-var Scheme = mongoose.Schema;
+var Scheme = mongoose.Schema; // https://res.cloudinary.com/demo/image/upload/w_400,h_400,c_crop,g_face,r_max/w_200/lady.jpg
+
+var ImageSchema = new Scheme({
+  url: String,
+  filename: String
+}); // why we use virtual, because we don't store this in our db or in our model
+// because just derive it from the database
+// add a new virtual property in this 
+
+ImageSchema.virtual('thumbnail').get(function () {
+  return this.url.replace('/upload', '/upload/w_200');
+});
 var CampgroundSchema = new Scheme({
   title: String,
-  images: [{
-    url: String,
-    filename: String
-  }],
+  images: [ImageSchema],
+  geometry: {
+    type: {
+      type: String,
+      "enum": ['Point'],
+      required: true
+    },
+    coordinates: {
+      type: [Number],
+      required: true
+    }
+  },
   price: Number,
   description: String,
   location: String,

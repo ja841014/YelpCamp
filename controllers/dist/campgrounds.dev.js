@@ -16,6 +16,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 var Campground = require('../models/campground');
 
+var mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
+
+var mapBoxToken = process.env.MAPBOX_TOKEN; // init by pass the token 
+
+var geocoder = mbxGeocoding({
+  accessToken: mapBoxToken
+});
+
 var _require = require("../cloudinary"),
     cloudinary = _require.cloudinary;
 
@@ -47,15 +55,24 @@ module.exports.renderNewForm = function (req, res) {
 };
 
 module.exports.createCampground = function _callee2(req, res) {
-  var campground;
+  var geoData, campground;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
+          _context2.next = 2;
+          return regeneratorRuntime.awrap(geocoder.forwardGeocode({
+            query: req.body.campground.location,
+            limit: 1
+          }).send());
+
+        case 2:
+          geoData = _context2.sent;
           // if(!req.body.campground) {
           //     throw new ExpressError('Invalid campground Data', 400);
           // }
-          campground = new Campground(req.body.campground); // put the url and filename in the campground.images 
+          campground = new Campground(req.body.campground);
+          campground.geometry = geoData.body.features[0].geometry; // put the url and filename in the campground.images 
 
           campground.images = req.files.map(function (f) {
             return {
@@ -64,16 +81,16 @@ module.exports.createCampground = function _callee2(req, res) {
             };
           });
           campground.author = req.user._id;
-          _context2.next = 5;
+          _context2.next = 9;
           return regeneratorRuntime.awrap(campground.save());
 
-        case 5:
+        case 9:
           console.log(campground);
           req.flash('success', 'Succeessfully made a new campground'); //redirect to /campgrounds/:id this route
 
           res.redirect("/campgrounds/".concat(campground._id));
 
-        case 8:
+        case 12:
         case "end":
           return _context2.stop();
       }
