@@ -12,6 +12,13 @@ var map = new mapboxgl.Map({
   // starting position [lng, lat]
   zoom: 8 // starting zoom
 
-}); // set a pin on the map
+}); // add zoon control to the map
 
-new mapboxgl.Marker().setLngLat(campground.geometry.coordinates).addTo(map);
+map.addControl(new mapboxgl.NavigationControl({
+  showZoom: true,
+  visualizePitch: true
+})); // set a pin on the map
+
+new mapboxgl.Marker().setLngLat(campground.geometry.coordinates).setPopup(new mapboxgl.Popup({
+  offset: 25
+}).setHTML("<h3>".concat(campground.title, "</h3>"))).addTo(map);

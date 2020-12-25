@@ -16,6 +16,12 @@ var ImageSchema = new Scheme({
 ImageSchema.virtual('thumbnail').get(function () {
   return this.url.replace('/upload', '/upload/w_200');
 });
+var opts = {
+  toJSON: {
+    virtuals: true
+  }
+}; // if we do not add "opts", we cannot get virtual property in our object
+
 var CampgroundSchema = new Scheme({
   title: String,
   images: [ImageSchema],
@@ -41,6 +47,9 @@ var CampgroundSchema = new Scheme({
     type: Scheme.Types.ObjectId,
     ref: 'Review'
   }]
+}, opts);
+CampgroundSchema.virtual('properties.popUpMarkup').get(function () {
+  return "\n    <strong><a href=\"/campgrounds/".concat(this._id, "\">").concat(this.title, "</a><strong>\n    <p>$").concat(this.price, "/day</p>\n    ");
 });
 CampgroundSchema.post('findOneAndDelete', function _callee(doc) {
   return regeneratorRuntime.async(function _callee$(_context) {

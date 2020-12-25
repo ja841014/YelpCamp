@@ -16,6 +16,8 @@ ImageSchema.virtual('thumbnail').get(function() {
     return this.url.replace('/upload', '/upload/w_200');
 })
 
+const opts = {toJSON : {virtuals: true} };
+// if we do not add "opts", we cannot get virtual property in our object
 const CampgroundSchema = new Scheme({
     title: String,
     images: [ImageSchema],
@@ -42,8 +44,18 @@ const CampgroundSchema = new Scheme({
             type: Scheme.Types.ObjectId,
             ref: 'Review'
         }
-    ]
+    ],
+    
+}, opts)
+
+CampgroundSchema.virtual('properties.popUpMarkup').get(function() {
+    return `
+    <strong><a href="/campgrounds/${this._id}">${this.title}</a><strong>
+    <p>$${this.price}/day</p>
+    `;
 })
+
+
 
 CampgroundSchema.post('findOneAndDelete', async function(doc) {
     // if found and delete the campground

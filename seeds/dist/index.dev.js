@@ -38,7 +38,7 @@ var seedDB = function seedDB() {
           i = 0;
 
         case 3:
-          if (!(i < 50)) {
+          if (!(i < 300)) {
             _context.next = 12;
             break;
           }
