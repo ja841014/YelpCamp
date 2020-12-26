@@ -24,7 +24,10 @@ var ExpressError = require('./utils/ExpressError'); // the over-ride method can 
 
 var methodOverride = require('method-override');
 
-var User = require('./models/user');
+var User = require('./models/user'); // prevent client enter some sentitive word such as '$'
+
+
+var mongoSanitize = require('express-mongo-sanitize');
 
 var passport = require('passport');
 
@@ -64,12 +67,15 @@ app.use(express.urlencoded({
 }));
 app.use(methodOverride('_method'));
 app.use(express["static"](path.join(__dirname, 'public')));
+app.use(mongoSanitize());
 var sessionConfig = {
+  name: 'session',
   secret: 'sould be a good secret',
   resave: false,
   saveUninitialized: true,
   cookie: {
     httpOnly: true,
+    // secure: true,
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxAge: 1000 * 60 * 60 * 24 * 7
   }

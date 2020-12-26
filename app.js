@@ -18,6 +18,10 @@ const ExpressError = require('./utils/ExpressError');
 const methodOverride = require('method-override');
 const User =require('./models/user')
 
+// prevent client enter some sentitive word such as '$'
+const mongoSanitize = require('express-mongo-sanitize');
+
+
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 // const Campground = require('./models/campground');
@@ -53,12 +57,17 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(mongoSanitize());
+
+
 const sessionConfig = {
+    name: 'session',
     secret: 'sould be a good secret',
     resave: false,
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
+        // secure: true,
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
@@ -75,6 +84,7 @@ passport.deserializeUser(User.deserializeUser());
 
 // it is apply in every route
 app.use((req, res, next) => {
+
     res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
