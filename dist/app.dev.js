@@ -3,7 +3,8 @@
 // if we are not in the 'production' node enviornment we have to require 
 if (process.env.NODE_ENV !== "production") {
   require('dotenv').config();
-}
+} // mongodb+srv://ja841014:<password>@cluster0.3zcje.mongodb.net/<dbname>?retryWrites=true&w=majority
+
 
 var express = require('express');
 
@@ -29,6 +30,8 @@ var User = require('./models/user'); // prevent client enter some sentitive word
 
 var mongoSanitize = require('express-mongo-sanitize');
 
+var helmet = require('helmet');
+
 var passport = require('passport');
 
 var LocalStrategy = require('passport-local'); // const Campground = require('./models/campground');
@@ -40,10 +43,15 @@ var campgroundRoutes = require('./routes/campgrounds');
 
 var reviewRoutes = require('./routes/reviews');
 
-var userRoutes = require('./routes/users'); // yelp-camp db name
+var userRoutes = require('./routes/users'); // connect to mongo cloud https://www.npmjs.com/package/connect-mongo
 
 
-mongoose.connect('mongodb://localhost:27017/yelp-camp', {
+var MongoDBStore = require("connect-mongo")(session);
+
+var dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp'; // yelp-camp db name
+// 'mongodb://localhost:27017/yelp-camp'
+
+mongoose.connect(dbUrl, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useUnifiedTopology: true,
@@ -68,9 +76,38 @@ app.use(express.urlencoded({
 app.use(methodOverride('_method'));
 app.use(express["static"](path.join(__dirname, 'public')));
 app.use(mongoSanitize());
+var scriptSrcUrls = ["https://stackpath.bootstrapcdn.com", "https://api.tiles.mapbox.com", "https://api.mapbox.com", "https://kit.fontawesome.com", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"];
+var styleSrcUrls = ["https://kit-free.fontawesome.com", "https://stackpath.bootstrapcdn.com", "https://api.mapbox.com", "https://api.tiles.mapbox.com", "https://fonts.googleapis.com", "https://use.fontawesome.com", "https://cdn.jsdelivr.net"];
+var connectSrcUrls = ["https://api.mapbox.com", "https://*.tiles.mapbox.com", "https://events.mapbox.com"];
+var fontSrcUrls = [];
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: [],
+    connectSrc: ["'self'"].concat(connectSrcUrls),
+    scriptSrc: ["'unsafe-inline'", "'self'"].concat(scriptSrcUrls),
+    styleSrc: ["'self'", "'unsafe-inline'"].concat(styleSrcUrls),
+    workerSrc: ["'self'", "blob:"],
+    childSrc: ["blob:"],
+    objectSrc: [],
+    imgSrc: ["'self'", "blob:", "data:", "https://res.cloudinary.com/ja841014/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
+    "https://images.unsplash.com"],
+    fontSrc: ["'self'"].concat(fontSrcUrls)
+  }
+}));
+var secret = process.env.SECRET || 'sould be a good secret'; // use mongo to help us store session
+
+var store = new MongoDBStore({
+  url: dbUrl,
+  secret: secret,
+  touchAfter: 24 * 60 * 60
+});
+store.on("error", function (e) {
+  console.log("SESSION STORE ERROR", e);
+});
 var sessionConfig = {
+  store: store,
   name: 'session',
-  secret: 'sould be a good secret',
+  secret: secret,
   resave: false,
   saveUninitialized: true,
   cookie: {
