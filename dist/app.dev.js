@@ -156,7 +156,9 @@ app.use(function (err, req, res, next) {
   res.status(statusCode).render('error', {
     err: err
   });
-});
-app.listen(3000, function () {
-  console.log("CONNECTED!");
+}); // it will set by heroju nomarlly is 80 for heroku
+
+var port = process.env.PORT || 3000;
+app.listen(port, function () {
+  console.log("CONNECTED! ".concat(port));
 });
