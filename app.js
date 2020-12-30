@@ -24,7 +24,7 @@ const User =require('./models/user')
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 
-
+// https://andyyou.github.io/2017/04/11/express-passport/
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 // const Campground = require('./models/campground');
@@ -170,9 +170,6 @@ app.get('/', (req, res) => {
     res.render('home');
 });
 
-// delete
-
-
 
 
 // nothing is match in the above route will go in this route
@@ -190,7 +187,7 @@ app.use((err, req, res, next) => {
     }
     res.status(statusCode).render('error', {err});
 })
-// it will set by heroju nomarlly is 80 for heroku
+// it will set by heroku nomarlly is 80 for heroku
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {

@@ -14,7 +14,8 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var Campground = require('../models/campground');
+var Campground = require('../models/campground'); // It will accept anything that Google will accept: cities, streets, countries, etc.
+
 
 var mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 

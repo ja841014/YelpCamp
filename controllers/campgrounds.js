@@ -1,5 +1,5 @@
 const Campground = require('../models/campground');
-
+// It will accept anything that Google will accept: cities, streets, countries, etc.
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding")
 const mapBoxToken = process.env.MAPBOX_TOKEN;
 // init by pass the token 

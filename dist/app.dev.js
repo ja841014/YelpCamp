@@ -30,7 +30,8 @@ var User = require('./models/user'); // prevent client enter some sentitive word
 
 var mongoSanitize = require('express-mongo-sanitize');
 
-var helmet = require('helmet');
+var helmet = require('helmet'); // https://andyyou.github.io/2017/04/11/express-passport/
+
 
 var passport = require('passport');
 
@@ -136,8 +137,7 @@ app.use('/campgrounds/:id/reviews', reviewRoutes);
 app.use('/', userRoutes);
 app.get('/', function (req, res) {
   res.render('home');
-}); // delete
-// nothing is match in the above route will go in this route
+}); // nothing is match in the above route will go in this route
 
 app.all('*', function (req, res, next) {
   // this next will hit the generic error handler below
@@ -156,7 +156,7 @@ app.use(function (err, req, res, next) {
   res.status(statusCode).render('error', {
     err: err
   });
-}); // it will set by heroju nomarlly is 80 for heroku
+}); // it will set by heroku nomarlly is 80 for heroku
 
 var port = process.env.PORT || 3000;
 app.listen(port, function () {
