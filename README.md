@@ -7,16 +7,16 @@ YelpCamp is a Node.js responsive web application with RESTful routing project de
 
 ## Features
 • Authentication:   
-  _User signup with username, Email and password_   
-  _User login with username and password_   
+  a. _User signup with username, Email and password_   
+  b. _User login with username and password_   
 • Authorization:    
-    _User cannot edit posts and response posts without being authenticated_ 
-    _User cannot edit or delete posts and comments which created by other_  
+  a. _User cannot edit posts and response posts without being authenticated_ 
+  b. _User cannot edit or delete posts and comments which created by other_  
 • Security: 
     _User cannot enter sensitive words in any textbox such as "$ . "<script>" "_    
 • Four basic operations - CRUD  
     _Create, read, update and delete campgrounds_   
-    _Display campgrounds on the Mapbox_ 
+    _Display campgrounds on the Mapbox_     
 • Pop up flash messages communicate information with the users  
 
 ## Built with
@@ -29,12 +29,12 @@ YelpCamp is a Node.js responsive web application with RESTful routing project de
 • <a href="https://www.mongodb.com/cloud/atlas">MongoDB Atlas</a>   
 • <a href="https://cloudinary.com/">Cloudinary</a>  
 • <a href="https://expressjs.com/">Express</a>  
-• <a href="http://www.passportjs.org/">passport</a> 
-• <a href="https://github.com/expressjs/session#express-session">expess-session</a> 
+• <a href="http://www.passportjs.org/">passport</a>     
+• <a href="https://github.com/expressjs/session#express-session">expess-session</a>     
 • <a href="https://github.com/wyattdanger/geocoder#geocoder">geocoder</a>   
 • <a href="https://github.com/expressjs/method-override#method-override">method-override</a>    
 • <a href="https://github.com/jaredhanson/connect-flash#connect-flash">connect-flash</a>    
-• <a href="https://www.npmjs.com/package/express-mongo-sanitize">express-mongo-sanitize</a> 
+• <a href="https://www.npmjs.com/package/express-mongo-sanitize">express-mongo-sanitize</a>     
 • <a href="https://www.npmjs.com/package/sanitize-html">sanitize-html</a>   
 • <a href="https://helmetjs.github.io/">helmet</a>  
 ### Deploy
