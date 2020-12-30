@@ -7,13 +7,13 @@ YelpCamp is a Node.js responsive web application with RESTful routing project de
 
 ## Features
 • Authentication:   
-  a. _User signup with username, Email and password_   
-  b. _User login with username and password_   
+    _User signup with username, Email and password_   
+    _User login with username and password_   
 • Authorization:    
-  a. _User cannot edit posts and response posts without being authenticated_ 
-  b. _User cannot edit or delete posts and comments which created by other_  
+    _User cannot edit posts and response posts without being authenticated_ 
+    _User cannot edit or delete posts and comments which created by other_  
 • Security: 
-    _User cannot enter sensitive words in any textbox such as "$ . "<script>" "_    
+    _User cannot enter sensitive words in any textbox such as "$ . <script> "_    
 • Four basic operations - CRUD  
     _Create, read, update and delete campgrounds_   
     _Display campgrounds on the Mapbox_     
@@ -22,7 +22,7 @@ YelpCamp is a Node.js responsive web application with RESTful routing project de
 ## Built with
 
 ### Frontend
-• <a href="https://ejs.co/">ejs</a> 
+• <a href="https://ejs.co/">ejs</a>     
 • <a href="https://getbootstrap.com/docs/4.0/getting-started/introduction/">Bootstrap</a>   
 • <a href="https://www.mapbox.com/">Mapbox</a>  
 ### Backend
