@@ -7,10 +7,10 @@ YelpCamp is a Node.js responsive web application with RESTful routing project de
 
 ## Features
 • Authentication:   
-    *_User signup with username, Email and password_   
-    *_User login with username and password_   
+    * _User signup with username, Email and password_   
+    *   _User login with username and password_   
 • Authorization:    
-    *_User cannot edit posts and response posts without being authenticated_ 
+    *_User cannot edit posts and response posts without being authenticated_    
     *_User cannot edit or delete posts and comments which created by other_  
 • Security: 
     *_User cannot enter sensitive words in any textbox such as "$ . <script> "_    
