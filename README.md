@@ -6,7 +6,7 @@ YelpCamp is a Node.js responsive web application with RESTful routing project de
 <a href="https://fast-woodland-44234.herokuapp.com/">To see the app in action</a>
 
 ## Features
-• <br>Authentication:</br>   
+• Authentication:   
 *   _User signup with username, Email and password_   
 *   _User login with username and password_   
 • Authorization:    
